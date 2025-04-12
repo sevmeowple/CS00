@@ -35,10 +35,10 @@ def get_stack_info(attempt=0):
             }
         return None
     except subprocess.TimeoutExpired:
-        print(f"Attempt {attempt} timed out")
+        print("Attempt {0} timed out".format(attempt))
         return None
     except Exception as e:
-        print(f"Attempt {attempt} error: {e}")
+        print("Attempt {0} error: {1}".format(attempt, e))
         return None
 
 def analyze_addresses(addresses, num_runs):
@@ -48,30 +48,33 @@ def analyze_addresses(addresses, num_runs):
     
     esp_values = [info['esp'] for info in addresses if 'esp' in info]
     
-    print(f"\n--- Stack Address Statistics (Success rate: {len(esp_values)}/{num_runs} = {len(esp_values)/num_runs*100:.2f}%) ---")
-    print(f"Min value: 0x{min(esp_values):08x}")
-    print(f"Max value: 0x{max(esp_values):08x}")
-    print(f"Average: 0x{statistics.mean(esp_values):.0f}")
-    print(f"Median: 0x{statistics.median(esp_values):.0f}")
-    print(f"Std Dev: {statistics.stdev(esp_values):.2f}")
-    print(f"Range size: {max(esp_values) - min(esp_values)} bytes")
+    success_rate = len(esp_values)/num_runs*100
+    print("\n--- Stack Address Statistics (Success rate: {0}/{1} = {2:.2f}%) ---".format(
+        len(esp_values), num_runs, success_rate))
+    print("Min value: 0x{0:08x}".format(min(esp_values)))
+    print("Max value: 0x{0:08x}".format(max(esp_values)))
+    print("Average: 0x{0:.0f}".format(statistics.mean(esp_values)))
+    print("Median: 0x{0:.0f}".format(statistics.median(esp_values)))
+    print("Std Dev: {0:.2f}".format(statistics.stdev(esp_values)))
+    print("Range size: {0} bytes".format(max(esp_values) - min(esp_values)))
     
     counter = Counter(esp_values)
     most_common = counter.most_common(5)
     print("\nMost common addresses:")
     for addr, count in most_common:
-        print(f"0x{addr:08x}: occurs {count} times ({count/len(esp_values)*100:.2f}%)")
+        print("0x{0:08x}: occurs {1} times ({2:.2f}%)".format(
+            addr, count, count/len(esp_values)*100))
     
     return statistics.mean(esp_values)
 
 def main():
     num_runs = 100  # Set number of runs
-    print(f"Starting stack address analysis (attempts: {num_runs})")
+    print("Starting stack address analysis (attempts: {0})".format(num_runs))
     
     address_info_list = []
     for i in range(num_runs):
         if i % 10 == 0:
-            print(f"Progress: {i}/{num_runs}")
+            print("Progress: {0}/{1}".format(i, num_runs))
         info = get_stack_info(i)
         if info:
             address_info_list.append(info)
@@ -80,10 +83,10 @@ def main():
     
     # Generate attack vector reference info
     if avg_addr:
-        print(f"\n--- Attack Vector Reference ---")
-        print(f"Average stack address: 0x{int(avg_addr):08x}")
-        print(f"Possible buffer offset: Needs experimental verification")
-        print(f"Note: Due to ASLR, attack success rate will be low, requiring brute force approach")
+        print("\n--- Attack Vector Reference ---")
+        print("Average stack address: 0x{0:08x}".format(int(avg_addr)))
+        print("Possible buffer offset: Needs experimental verification")
+        print("Note: Due to ASLR, attack success rate will be low, requiring brute force approach")
 
 if __name__ == "__main__":
     main()
