@@ -3,3 +3,6 @@ src/*
 *.doc
 
 build
+tmp
+
+*.log
