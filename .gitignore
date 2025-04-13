@@ -1,6 +1,7 @@
 src/*
 
 *.doc
+*.pdf
 
 build
 tmp
